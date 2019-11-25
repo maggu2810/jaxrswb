@@ -4,7 +4,7 @@
 
   <groupId>de.maggu2810.jaxrswb</groupId>
   <artifactId>jaxrswb</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.3</version>
   <packaging>pom</packaging>
 
   <name>OSGi JAX-RS Whiteboard</name>
@@ -30,7 +30,7 @@
   <scm>
     <connection>scm:git:git@github.com:maggu2810/jaxrswb.git</connection>
     <developerConnection>scm:git:git@github.com:maggu2810/jaxrswb.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>jaxrswb-0.0.3</tag>
     <url>https://github.com/maggu2810/jaxrswb</url>
   </scm>
 

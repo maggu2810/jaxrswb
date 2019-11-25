@@ -5,7 +5,7 @@
   <parent>
     <groupId>de.maggu2810.jaxrswb.bundles</groupId>
     <artifactId>jaxrswb-bundles</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
   </parent>
 
   <artifactId>jaxrswb-swagger1-gen</artifactId>
