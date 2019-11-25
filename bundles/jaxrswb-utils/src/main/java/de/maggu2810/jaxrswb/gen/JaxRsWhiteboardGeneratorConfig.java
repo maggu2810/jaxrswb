@@ -18,7 +18,7 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.gen;
+package de.maggu2810.jaxrswb.gen;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;

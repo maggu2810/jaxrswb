@@ -18,7 +18,7 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.utils;
+package de.maggu2810.jaxrswb.utils;
 
 import java.util.Arrays;
 import java.util.Collection;

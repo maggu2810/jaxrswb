@@ -23,7 +23,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.maggu2810.osgi.jaxrswb.oapi.gen.JaxRsWhiteboardOpenAPIGenerator;
+import de.maggu2810.jaxrswb.oapi.gen.JaxRsWhiteboardOpenAPIGenerator;
 import io.swagger.v3.oas.annotations.Hidden;
 
 /**
@@ -61,7 +61,7 @@ public class App {
     public Response getOpenApi() {
         final Map<String, Object> map;
         try {
-            map = generator.toMap(generator.generate());
+            map = generator.generateMap();
         } catch (final IOException ex) {
             logger.warn("Error on OpenAPI DTO generation.", ex);
             return Response.serverError().build();

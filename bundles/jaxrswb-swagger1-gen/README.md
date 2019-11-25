@@ -23,7 +23,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.maggu2810.osgi.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
+import de.maggu2810.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
 
 /**
  * An endpoint to generate and provide an Swagger 1 description.
@@ -59,7 +59,7 @@ public class App {
     public Object getSwagger() {
         final Map<String, Object> map;
         try {
-            map = generator.toMap(generator.generate());
+            map = generator.generateMap();
         } catch (final IOException ex) {
             logger.warn("Error on Swagger DTO generation.", ex);
             return Response.serverError().build();

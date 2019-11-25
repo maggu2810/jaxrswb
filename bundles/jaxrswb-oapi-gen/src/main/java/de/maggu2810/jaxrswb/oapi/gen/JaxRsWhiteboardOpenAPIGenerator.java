@@ -18,16 +18,15 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.oapi.gen;
+package de.maggu2810.jaxrswb.oapi.gen;
 
-import de.maggu2810.osgi.jaxrswb.gen.JaxRsWhiteboardBaseGenerator;
-import io.swagger.v3.oas.models.OpenAPI;
+import de.maggu2810.jaxrswb.gen.JaxRsWhiteboardBaseGenerator;
 
 /**
  * Interface for an OpenAPI generator relying on JAX-RS Whiteboard.
  *
  * @author Markus Rathgeb
  */
-public interface JaxRsWhiteboardOpenAPIGenerator extends JaxRsWhiteboardBaseGenerator<OpenAPI> {
+public interface JaxRsWhiteboardOpenAPIGenerator extends JaxRsWhiteboardBaseGenerator {
 
 }

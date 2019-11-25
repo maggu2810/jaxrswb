@@ -18,9 +18,9 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.swagger1.gen;
+package de.maggu2810.jaxrswb.swagger1.gen;
 
-import de.maggu2810.osgi.jaxrswb.gen.JaxRsWhiteboardBaseGenerator;
+import de.maggu2810.jaxrswb.gen.JaxRsWhiteboardBaseSpecialGenerator;
 import io.swagger.models.Swagger;
 
 /**
@@ -28,6 +28,7 @@ import io.swagger.models.Swagger;
  *
  * @author Markus Rathgeb
  */
-public interface JaxRsWhiteboardSwaggerGenerator extends JaxRsWhiteboardBaseGenerator<Swagger> {
+public interface JaxRsWhiteboardSwaggerSpecialGenerator
+        extends JaxRsWhiteboardBaseSpecialGenerator<Swagger>, JaxRsWhiteboardSwaggerGenerator {
 
 }

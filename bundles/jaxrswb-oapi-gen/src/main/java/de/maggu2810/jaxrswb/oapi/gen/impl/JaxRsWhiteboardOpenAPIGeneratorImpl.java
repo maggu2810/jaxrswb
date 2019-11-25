@@ -1,6 +1,6 @@
 /*-
  * #%L
- * jaxrswb-swagger1-gen
+ * jaxrswb-oapi-gen
  * %%
  * Copyright (C) 2019 maggu2810
  * %%
@@ -18,12 +18,12 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.swagger1.gen.impl;
+package de.maggu2810.jaxrswb.oapi.gen.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -36,39 +36,26 @@ import org.osgi.service.metatype.annotations.Designate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.maggu2810.osgi.jaxrswb.gen.JaxRsWhiteboardGeneratorConfig;
-import de.maggu2810.osgi.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
-import de.maggu2810.osgi.jaxrswb.utils.JaxRsHelper;
-import io.swagger.jaxrs.Reader;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.util.Json;
+import de.maggu2810.jaxrswb.gen.JaxRsWhiteboardGeneratorConfig;
+import de.maggu2810.jaxrswb.oapi.gen.JaxRsWhiteboardOpenAPIGenerator;
+import de.maggu2810.jaxrswb.oapi.gen.JaxRsWhiteboardOpenAPISpecialGenerator;
+import de.maggu2810.jaxrswb.utils.JaxRsHelper;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.jaxrs2.Reader;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 /**
- * An JAX-RS Whiteboard Swagger 1 generator implementation.
+ * An JAX-RS Whiteboard OpenAPI generator implementation.
  *
  * @author Markus Rathgeb
  */
-@Component(name = "de.maggu2810.osgi.jaxrswb.swagger1.gen")
+@Component(name = "de.maggu2810.jaxrswb.oapi.gen", service = { JaxRsWhiteboardOpenAPISpecialGenerator.class,
+        JaxRsWhiteboardOpenAPIGenerator.class })
 @Designate(ocd = JaxRsWhiteboardGeneratorConfig.class)
-public class JaxRsWhiteboardSwaggerGeneratorImpl implements JaxRsWhiteboardSwaggerGenerator {
-
-    private static class SwaggerReader extends Reader {
-        public SwaggerReader(final Swagger swagger) {
-            super(swagger);
-        }
-
-        @Override
-        public Swagger read(final Class<?> cls, final String parentPath, final String parentMethod,
-                final boolean isSubresource, final String[] parentConsumes, final String[] parentProduces,
-                final Map<String, Tag> parentTags, final List<Parameter> parentParameters) {
-            return super.read(cls, parentPath, parentMethod, isSubresource, parentConsumes, parentProduces, parentTags,
-                    parentParameters);
-        }
-    }
+public class JaxRsWhiteboardOpenAPIGeneratorImpl implements JaxRsWhiteboardOpenAPISpecialGenerator {
 
     private final BundleContext bc;
     private final JaxRsWhiteboardGeneratorConfig config;
@@ -80,45 +67,45 @@ public class JaxRsWhiteboardSwaggerGeneratorImpl implements JaxRsWhiteboardSwagg
      * @param config the configuration
      */
     @Activate
-    public JaxRsWhiteboardSwaggerGeneratorImpl(final BundleContext bc, final JaxRsWhiteboardGeneratorConfig config) {
+    public JaxRsWhiteboardOpenAPIGeneratorImpl(final BundleContext bc, final JaxRsWhiteboardGeneratorConfig config) {
         this.bc = bc;
         this.config = config;
     }
 
     @Override
-    public Swagger generate() {
-        final Swagger swagger = newPreConfiguredSwagger(config);
-        final SwaggerReader reader = new SwaggerReader(swagger);
+    public OpenAPI generate() {
+        final OpenAPI openAPI = newPreConfiguredOpenAPI(config);
+        final Reader reader = new Reader(openAPI);
 
         final JaxRsHelper jaxRsHelper = new JaxRsHelper(bc);
         final Map<String, Set<Class<?>>> basePathAndClasses = jaxRsHelper.getBasePathAndClasses();
         basePathAndClasses.forEach((basePath, classes) -> {
             classes.forEach(clazz -> {
                 final String parentPath = basePath.startsWith("/") ? basePath : "/" + basePath;
-                reader.read(clazz, parentPath, null, false, new String[0], new String[0],
-                        new LinkedHashMap<String, Tag>(), new ArrayList<Parameter>());
+                reader.read(clazz, parentPath, null, false, null, null, new LinkedHashSet<String>(),
+                        new ArrayList<Parameter>(), new HashSet<Class<?>>());
             });
         });
 
-        return reader.getSwagger();
+        return reader.getOpenAPI();
     }
 
     @Override
-    public String toJSON(final Swagger info) throws IOException {
+    public String toJSON(final OpenAPI info) throws IOException {
         final ObjectMapper mapper = Json.mapper();
-        return mapper.writeValueAsString(info);
+        return mapper.writeValueAsString(generate());
     }
 
     @Override
-    public Map<String, Object> toMap(final Swagger info) throws IOException {
+    public Map<String, Object> toMap(final OpenAPI info) throws IOException {
         final ObjectMapper mapper = Json.mapper();
         final String jsonString = mapper.writeValueAsString(info);
         return mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
         });
     }
 
-    private Swagger newPreConfiguredSwagger(final JaxRsWhiteboardGeneratorConfig config) {
-        final Swagger swagger = new Swagger();
+    private OpenAPI newPreConfiguredOpenAPI(final JaxRsWhiteboardGeneratorConfig config) {
+        final OpenAPI openAPI = new OpenAPI();
 
         final Info info = new Info();
         // Has something been added to "info"
@@ -136,10 +123,10 @@ public class JaxRsWhiteboardSwaggerGeneratorImpl implements JaxRsWhiteboardSwagg
         infoAdded |= ifNotEmpty(config.info_title(), value -> info.setTitle(value));
         infoAdded |= ifNotEmpty(config.info_description(), value -> info.setDescription(value));
 
-        // Swagger
-        ifTrue(infoAdded, () -> swagger.setInfo(info));
+        // OpenAPI
+        ifTrue(infoAdded, () -> openAPI.setInfo(info));
 
-        return swagger;
+        return openAPI;
     }
 
     private boolean ifNotEmpty(final String str, final Consumer<String> func) {

@@ -18,7 +18,7 @@
  * #L%
  */
 
-package de.maggu2810.osgi.jaxrswb.gen;
+package de.maggu2810.jaxrswb.gen;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @param <T> the type of the specific information
  */
-public interface JaxRsWhiteboardBaseGenerator<T> {
+public interface JaxRsWhiteboardBaseSpecialGenerator<T> extends JaxRsWhiteboardBaseGenerator {
 
     /**
      * Creates a specific information object.
@@ -75,5 +75,15 @@ public interface JaxRsWhiteboardBaseGenerator<T> {
      * @throws IOException on conversion errors
      */
     Map<String, Object> toMap(T info) throws IOException;
+
+    @Override
+    default String generateJSON() throws IOException {
+        return toJSON(generate());
+    }
+
+    @Override
+    default Map<String, Object> generateMap() throws IOException {
+        return toMap(generate());
+    }
 
 }
