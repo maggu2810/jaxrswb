@@ -115,7 +115,7 @@
             <bnd><![CDATA[-exportcontents: \
   !*.internal.*,\
   !*.impl.*, \
-  de.maggu2810.osgi.jaxrswb.*
+  de.maggu2810.jaxrswb.*
 -sources: false
 -contract: *]]></bnd>
           </configuration>
