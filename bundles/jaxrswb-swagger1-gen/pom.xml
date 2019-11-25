@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.maggu2810.jaxrswb.bundles</groupId>
+    <artifactId>jaxrswb-bundles</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>jaxrswb-swagger1-gen</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.cmpn</artifactId>
+      <version>7.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.spec</groupId>
+      <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+      <version>1.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jaxrs</artifactId>
+      <version>1.6.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>org.eclipse.jdt.annotation</artifactId>
+      <version>2.2.100</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
+      <artifactId>jaxrswb-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

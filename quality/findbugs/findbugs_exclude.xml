@@ -1,0 +1,9 @@
+<FindBugsFilter>
+  <Match>
+    <Class name="~.*\.*_" />
+  </Match>
+  <Match>
+    <Field type="org.slf4j.Logger" />
+    <Bug pattern="SE_BAD_FIELD" />
+  </Match>
+</FindBugsFilter>
