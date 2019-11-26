@@ -1,5 +1,15 @@
 # JAX-RS Whiteboard OpenAPI Generator
 
+## Known Issues
+
+### Classes path annotation
+
+Swagger 1.6
+
+The classes path annotation needs to begin with a `/`.
+
+See: https://github.com/swagger-api/swagger-core/issues/3367
+
 ## Examples
 
 ### JAX-RS Whiteboard resource
