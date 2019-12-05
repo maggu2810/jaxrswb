@@ -122,6 +122,7 @@ public class JaxRsWhiteboardOpenAPIGeneratorImpl implements JaxRsWhiteboardOpenA
         infoAdded |= ifTrue(contactAdded, () -> info.setContact(contact));
         infoAdded |= ifNotEmpty(config.info_title(), value -> info.setTitle(value));
         infoAdded |= ifNotEmpty(config.info_description(), value -> info.setDescription(value));
+        infoAdded |= ifNotEmpty(config.info_version(), value -> info.setVersion(value));
 
         // OpenAPI
         ifTrue(infoAdded, () -> openAPI.setInfo(info));

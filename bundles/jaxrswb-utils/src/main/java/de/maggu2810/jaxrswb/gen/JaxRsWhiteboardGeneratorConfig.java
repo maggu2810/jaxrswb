@@ -31,6 +31,9 @@ public @interface JaxRsWhiteboardGeneratorConfig {
     @AttributeDefinition(description = "the description (not used if empty)")
     String info_description() default "";
 
+    @AttributeDefinition(description = "the version (not used if empty)")
+    String info_version() default "";
+
     @AttributeDefinition(description = "the contact's name (not used if empty)")
     String contact_name() default "";
 
