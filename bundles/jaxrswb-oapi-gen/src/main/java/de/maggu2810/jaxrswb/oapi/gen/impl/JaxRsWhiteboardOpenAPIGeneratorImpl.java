@@ -2,7 +2,7 @@
  * #%L
  * jaxrswb-oapi-gen
  * %%
- * Copyright (C) 2019 maggu2810
+ * Copyright (C) 2019 - 2020 maggu2810
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,10 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 @Designate(ocd = JaxRsWhiteboardGeneratorConfig.class)
 public class JaxRsWhiteboardOpenAPIGeneratorImpl implements JaxRsWhiteboardOpenAPISpecialGenerator {
 
+    @SuppressWarnings("all")
+    private static final TypeReference<Map<String, Object>> TYPEREF_MAP_STR_OBJ = new TypeReference<Map<String, Object>>() {
+    };
+
     private final BundleContext bc;
     private final JaxRsWhiteboardGeneratorConfig config;
 
@@ -100,8 +104,7 @@ public class JaxRsWhiteboardOpenAPIGeneratorImpl implements JaxRsWhiteboardOpenA
     public Map<String, Object> toMap(final OpenAPI info) throws IOException {
         final ObjectMapper mapper = Json.mapper();
         final String jsonString = mapper.writeValueAsString(info);
-        return mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
-        });
+        return mapper.readValue(jsonString, TYPEREF_MAP_STR_OBJ);
     }
 
     private OpenAPI newPreConfiguredOpenAPI(final JaxRsWhiteboardGeneratorConfig config) {

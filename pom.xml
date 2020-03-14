@@ -172,7 +172,7 @@
           <version>${bnd.version}</version>
           <configuration>
             <failOnChanges>false</failOnChanges>
-            <bndruns />
+            <bndruns></bndruns>
           </configuration>
           <executions>
             <execution>

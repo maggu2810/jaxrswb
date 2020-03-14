@@ -2,7 +2,7 @@
  * #%L
  * jaxrswb-utils
  * %%
- * Copyright (C) 2019 maggu2810
+ * Copyright (C) 2019 - 2020 maggu2810
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

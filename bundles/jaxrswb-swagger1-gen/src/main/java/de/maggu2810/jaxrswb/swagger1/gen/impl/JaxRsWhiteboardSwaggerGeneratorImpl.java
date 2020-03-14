@@ -2,7 +2,7 @@
  * #%L
  * jaxrswb-swagger1-gen
  * %%
- * Copyright (C) 2019 maggu2810
+ * Copyright (C) 2019 - 2020 maggu2810
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,10 @@ import io.swagger.util.Json;
         JaxRsWhiteboardSwaggerGenerator.class })
 @Designate(ocd = JaxRsWhiteboardGeneratorConfig.class)
 public class JaxRsWhiteboardSwaggerGeneratorImpl implements JaxRsWhiteboardSwaggerSpecialGenerator {
+
+    @SuppressWarnings("all")
+    private static final TypeReference<Map<String, Object>> TYPEREF_MAP_STR_OBJ = new TypeReference<Map<String, Object>>() {
+    };
 
     private static class SwaggerReader extends Reader {
         public SwaggerReader(final Swagger swagger) {
@@ -115,8 +119,7 @@ public class JaxRsWhiteboardSwaggerGeneratorImpl implements JaxRsWhiteboardSwagg
     public Map<String, Object> toMap(final Swagger info) throws IOException {
         final ObjectMapper mapper = Json.mapper();
         final String jsonString = mapper.writeValueAsString(info);
-        return mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
-        });
+        return mapper.readValue(jsonString, TYPEREF_MAP_STR_OBJ);
     }
 
     private Swagger newPreConfiguredSwagger(final JaxRsWhiteboardGeneratorConfig config) {

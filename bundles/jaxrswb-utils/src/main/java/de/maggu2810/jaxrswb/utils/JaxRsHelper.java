@@ -2,7 +2,7 @@
  * #%L
  * jaxrswb-utils
  * %%
- * Copyright (C) 2019 maggu2810
+ * Copyright (C) 2019 - 2020 maggu2810
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,12 @@
 
 package de.maggu2810.jaxrswb.utils;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Application;
 
@@ -40,8 +35,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * JAX-RS Whiteboard helper.
@@ -50,17 +43,31 @@ import org.slf4j.LoggerFactory;
  */
 public class JaxRsHelper {
 
-    private final Logger logger = LoggerFactory.getLogger(JaxRsHelper.class);
     private final BundleContext bc;
 
+    /**
+     * Creates a new JAX-RS helper instance.
+     *
+     * @param bc the bundle context
+     */
     public JaxRsHelper(final BundleContext bc) {
         this.bc = bc;
     }
 
+    /**
+     * Gets all base paths and its classes.
+     *
+     * @return map of base paths and the correspondent classes
+     */
     public Map<String, Set<Class<?>>> getBasePathAndClasses() {
+        // Map that holds the service reference to the applications as key.
+        // For every application it holds the JAX-RS resources that are using that application.
         final Map<ServiceReference<Application>, Set<ServiceReference<?>>> appsAndResources = new HashMap<>();
 
+        // Gets the default application.
         final ServiceReference<Application> jaxRsApplicationDefaultRef = getJaxRsDefaultApplication();
+
+        // Gets all JAX-RS resources.
         ServiceReference<?>[] jaxRsResourceRefs;
         try {
             jaxRsResourceRefs = bc.getServiceReferences((String) null, "(osgi.jaxrs.resource=true)");
@@ -68,7 +75,9 @@ public class JaxRsHelper {
             throw new IllegalStateException("The hardcoded filter expression must be valid!.");
         }
         if (jaxRsResourceRefs != null) {
+            // Inspect every JAX-RS resource.
             for (final ServiceReference<?> ref : jaxRsResourceRefs) {
+                // Find the JAX-RS application for the JAX-RS resource.
                 final String jaxRsApplicationSelect = getJaxRsApplicationSelect(ref);
                 final ServiceReference<Application> jaxRsApplicationRef;
                 if (jaxRsApplicationSelect == null) {
@@ -83,25 +92,38 @@ public class JaxRsHelper {
                     }
                     jaxRsApplicationRef = getTopRanked(jaxRsApplicationRefs);
                 }
+
+                // Adds the JAX-RS to the respective JAX-RS application.
                 appsAndResources.computeIfAbsent(jaxRsApplicationRef, key -> new HashSet<>()).add(ref);
             }
         }
 
+        // Map that contains the base path of the application and the resource classes below that path.
         final Map<String, Set<Class<?>>> basePathAndClasses = new HashMap<>();
         appsAndResources.forEach((appRef, resources) -> {
+            // Convert the set of service reference to a set of classes of the referenced services.
             final Set<Class<?>> classes = new HashSet<>();
-            resources.forEach(ref -> forService(ref, srv -> classes.add(srv.getClass())));
-            // String basePath = buildPath(getJaxRsApplicationChain(appRef, jaxRsApplicationDefaultRef));
-            String basePath = Optional.ofNullable(getJaxRsApplicationBase(appRef)).orElse("");
-            if (basePath == null) {
-                basePath = "";
-            }
+            resources.stream().forEach(ref -> {
+                final Object srv = bc.getService(ref);
+                if (srv != null) {
+                    try {
+                        classes.add(srv.getClass());
+                    } finally {
+                        bc.ungetService(ref);
+                    }
+                }
+            });
+
+            // Resolve the base path.
+            final String basePath = Optional.ofNullable(getJaxRsApplicationBase(appRef)).orElse("");
+
+            // Add the base path with its classes to the map.
             if (basePathAndClasses.put(basePath, classes) != null) {
                 throw new IllegalStateException("base path conflict");
             }
-            ;
         });
 
+        // Return the base path of the apps with its resources.
         return basePathAndClasses;
     }
 
@@ -113,7 +135,8 @@ public class JaxRsHelper {
         // * another application using a base of /
         Collection<ServiceReference<Application>> jaxRsApplicationDefaultRefs;
         try {
-            jaxRsApplicationDefaultRefs = bc.getServiceReferences(Application.class, "(osgi.jaxrs.name=.default)");
+            jaxRsApplicationDefaultRefs = bc.getServiceReferences(Application.class,
+                    "(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=.default)");
         } catch (final InvalidSyntaxException ex) {
             throw new IllegalStateException("The hardcoded filter expression must be valid!.");
         }
@@ -121,84 +144,6 @@ public class JaxRsHelper {
             return null;
         }
         return getTopRanked(jaxRsApplicationDefaultRefs);
-    }
-
-    private @Nullable List<ServiceReference<Application>> getJaxRsApplicationChain(
-            final ServiceReference<Application> ref, final @Nullable ServiceReference<Application> refDfl) {
-        final List<ServiceReference<Application>> appChain = new LinkedList<>();
-        appChain.add(ref);
-        if (ref.equals(refDfl)) {
-            return appChain;
-        }
-        for (ServiceReference<Application> refCur = ref; refCur != refDfl;) {
-            final String jaxRsApplicationSelect = getJaxRsApplicationSelect(refCur);
-            final ServiceReference<Application> jaxRsApplicationRef;
-            if (jaxRsApplicationSelect == null) {
-                jaxRsApplicationRef = refDfl;
-            } else {
-                final Collection<ServiceReference<Application>> jaxRsApplicationRefs;
-                try {
-                    jaxRsApplicationRefs = bc.getServiceReferences(Application.class, jaxRsApplicationSelect);
-                } catch (final InvalidSyntaxException ex) {
-                    logger.debug("Ignore invalid syntax.", ex);
-                    throw new IllegalStateException("We cannot build chain because of an invalid target filter", ex);
-                }
-                jaxRsApplicationRef = getTopRanked(jaxRsApplicationRefs);
-            }
-            if (jaxRsApplicationRef != null) {
-                if (appChain.contains(jaxRsApplicationRef)) {
-                    throw new IllegalStateException("app recursion");
-                }
-                appChain.add(jaxRsApplicationRef);
-            }
-            refCur = jaxRsApplicationRef;
-        }
-        return appChain;
-    }
-
-    private String buildPath(final List<ServiceReference<Application>> appRefs) {
-        String path = "";
-        for (final ServiceReference<Application> appRef : appRefs) {
-            String base = getJaxRsApplicationBase(appRef);
-            if (base == null) {
-                base = "";
-            } else {
-                if (base.endsWith("/")) {
-                    base = base.substring(0, base.length() - 1);
-                }
-            }
-            if (base.isEmpty()) {
-                continue;
-            }
-            if (path.isEmpty()) {
-                path = base;
-            } else {
-                path = base + "/" + path;
-            }
-        }
-        return path;
-    }
-
-    private void print(final @Nullable ServiceReference<?> reference) {
-        if (reference == null) {
-            System.out.println("<null>");
-        } else {
-            System.out.println(Arrays.stream(reference.getPropertyKeys()).map(key -> {
-                final Object value = reference.getProperty(key);
-                final String valueStr;
-                if (value == null) {
-                    valueStr = "<null>";
-                } else {
-                    final Class<?> cls = value.getClass();
-                    if (cls != null && cls.isArray()) {
-                        valueStr = Arrays.toString((Object[]) value);
-                    } else {
-                        valueStr = value.toString();
-                    }
-                }
-                return String.format("%s: %s", key, valueStr);
-            }).collect(Collectors.joining("; ", "properties: ", "")));
-        }
     }
 
     private <T> @Nullable ServiceReference<T> getTopRanked(final Collection<ServiceReference<T>> coll) {
@@ -223,26 +168,16 @@ public class JaxRsHelper {
         }
     }
 
-    private @Nullable String getJaxRsName(final ServiceReference<?> app) {
-        final Object obj = app.getProperty(JaxrsWhiteboardConstants.JAX_RS_NAME);
-        if (obj instanceof String) {
-            return (String) obj;
-        } else {
-            return null;
-        }
-    }
-
     private @Nullable String getJaxRsApplicationBase(final ServiceReference<?> ref) {
-        final Object obj = ref.getProperty(JaxrsWhiteboardConstants.JAX_RS_APPLICATION_BASE);
-        if (obj instanceof String) {
-            return (String) obj;
-        } else {
-            return null;
-        }
+        return getSrvPropOptString(ref, JaxrsWhiteboardConstants.JAX_RS_APPLICATION_BASE);
     }
 
     private @Nullable String getJaxRsApplicationSelect(final ServiceReference<?> ref) {
-        final Object obj = ref.getProperty(JaxrsWhiteboardConstants.JAX_RS_APPLICATION_SELECT);
+        return getSrvPropOptString(ref, JaxrsWhiteboardConstants.JAX_RS_APPLICATION_SELECT);
+    }
+
+    private @Nullable String getSrvPropOptString(final ServiceReference<?> ref, final String prop) {
+        final Object obj = ref.getProperty(prop);
         if (obj instanceof String) {
             return (String) obj;
         } else {
@@ -250,12 +185,4 @@ public class JaxRsHelper {
         }
     }
 
-    private <T> void forService(final ServiceReference<T> ref, final Consumer<T> consumer) {
-        final T srv = bc.getService(ref);
-        try {
-            consumer.accept(srv);
-        } finally {
-            bc.ungetService(ref);
-        }
-    }
 }
